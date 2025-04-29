@@ -1,6 +1,6 @@
 # .gitignore
-data/
-*.csv
+
+
 *.pkl
 *.h5
 *.pt

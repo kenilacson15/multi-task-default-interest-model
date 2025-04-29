@@ -1,0 +1,41 @@
+2025-04-28 23:53:21,640 INFO Loading data from C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\clean_data\cleaned_credit_risk.csv
+2025-04-28 23:53:21,674 INFO Data shape: (29582, 12)
+2025-04-28 23:53:21,683 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:21,698 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:23,250 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\missing_values.png
+2025-04-28 23:53:23,280 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:23,293 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:23,505 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\person_home_ownership_countplot.png
+2025-04-28 23:53:23,509 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:23,734 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\loan_intent_countplot.png
+2025-04-28 23:53:23,737 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:24,055 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\loan_grade_countplot.png
+2025-04-28 23:53:24,057 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:24,273 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\cb_person_default_on_file_countplot.png
+2025-04-28 23:53:24,279 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:24,430 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\target_distribution.png
+2025-04-28 23:53:24,556 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:24,574 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:24,689 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\person_age_by_loan_status.png
+2025-04-28 23:53:24,788 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:24,808 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:24,921 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\person_income_by_loan_status.png
+2025-04-28 23:53:25,054 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,082 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,190 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\person_emp_length_by_loan_status.png
+2025-04-28 23:53:25,296 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,318 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,402 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\loan_amnt_by_loan_status.png
+2025-04-28 23:53:25,502 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,521 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,614 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\loan_int_rate_by_loan_status.png
+2025-04-28 23:53:25,713 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,738 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,836 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\loan_percent_income_by_loan_status.png
+2025-04-28 23:53:25,937 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:25,958 INFO Using categorical units to plot a list of strings that are all parsable as floats or dates. If these strings should be plotted as numbers, cast to the appropriate data type before plotting.
+2025-04-28 23:53:26,082 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\cb_person_cred_hist_length_by_loan_status.png
+2025-04-28 23:53:26,092 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:26,434 INFO Saved figure: C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\exploratory-data-analysis\figures\correlation_heatmap.png
+2025-04-28 23:53:26,455 WARNING to_markdown failed; falling back to to_string().
+2025-04-28 23:53:26,458 INFO EDA completed successfully.
