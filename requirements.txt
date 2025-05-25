@@ -22,3 +22,7 @@ joblib>=1.2,<1.4          # Efficient object serialization (pipelines, models)
 # === Type Checking Support ===
 # For better IDE/editor support & code quality
 typing-extensions>=4.5,<5.0    # Optional, required in some older Python versions for new type hints
+
+# === Model Libraries ===
+xgboost>=1.7,<2.0           # Gradient boosting library for XGBoost model
+scipy>=1.9,<2.0             # Scientific computing (used for stats in data validation)

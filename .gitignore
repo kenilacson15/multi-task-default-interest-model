@@ -1,0 +1,71 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VSCode settings
+.vscode/
+
+# Data and model artifacts
+/data/*
+!data/raw/
+!data/clean_data/
+!data/train-validate-split/
+!data/exploratory-data-analysis/
+!data/feature-engineer/
+!data/model-results/
+!data/eda_reports/
+
+# Model files and outputs
+*.joblib
+*.pkl
+*.h5
+*.model
+*.sav
+*.npy
+*.npz
+
+# Plots and figures
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.pdf
+
+# Reports and logs
+*.log
+*.txt
+*.md
+!README.md
+!docs/
+!reports/feature_importance/*.png
+!reports/feature_importance/*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment and dependency files
+.env
+.venv/
+venv/
+
+# Notebook outputs
+notebooks/models/
+notebooks/reports/
+notebooks/data_quality_reports/
+
+# Ignore test outputs
+/tests/__pycache__/
+/tests/*.pyc
+
+# Misc
+*.bak
+*.swp
+
+# Uncomment below if you want to ignore all reports except documentation
+# /reports/
+# !/reports/feature_importance/
