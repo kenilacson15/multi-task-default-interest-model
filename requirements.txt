@@ -1,0 +1,24 @@
+# === Core Data Manipulation ===
+pandas>=1.5,<2.2          # DataFrame operations and data analysis
+numpy>=1.23,<1.27         # Numerical computing and array operations
+
+# === Visualization Libraries ===
+matplotlib>=3.6,<3.9      # Plotting and visualization
+seaborn>=0.12,<0.14       # Statistical data visualization, built on matplotlib
+
+# === Scikit-learn for ML workflows ===
+scikit-learn>=1.2,<1.5    # ML models, preprocessing, and utilities (e.g. Pipeline, train_test_split)
+
+# === Model Interpretation ===
+shap>=0.42,<0.45          # SHAP values for model explainability
+
+# === Serialization ===
+joblib>=1.2,<1.4          # Efficient object serialization (pipelines, models)
+
+# === Optional System Utilities ===
+# Included for completeness and script-based automation
+# No need to list built-in modules like os, argparse, logging, pathlib, datetime, warnings, json
+
+# === Type Checking Support ===
+# For better IDE/editor support & code quality
+typing-extensions>=4.5,<5.0    # Optional, required in some older Python versions for new type hints
