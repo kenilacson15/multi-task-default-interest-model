@@ -1,9 +1,0 @@
-# .gitignore
-
-
-*.pkl
-*.h5
-*.pt
-__pycache__/
-.ipynb_checkpoints/
-.env

@@ -14,11 +14,11 @@ logging.basicConfig(
 DATA_PATH = Path(r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\clean_data\cleaned_credit_risk.csv")
 OUTPUT_PATH = Path(r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\clean_data\capped_credit_risk.csv")
 
-# --- Columns to cap and their IQR bounds (based on your report) ---
+
 CAP_SETTINGS = {
     "person_age": (12.5, 40.5),
     "person_emp_length": (-5.5, 14.5),
-    # "person_income" and "loan_amnt" don't need capping as per your report.
+    
 }
 
 # --- Load Data ---

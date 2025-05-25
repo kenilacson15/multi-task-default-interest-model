@@ -4,8 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Optional: Uncomment if using ydata-profiling (formerly pandas-profiling)
-# from ydata_profiling import ProfileReport
+
 
 import logging
 import argparse
@@ -154,9 +153,7 @@ def main():
     plot_categorical(df, cat_cols, args.output_dir)
     correlation_heatmap(df, numeric_cols, args.output_dir)
 
-    # Uncomment the following line if ydata-profiling is installed
-    # generate_profile_report(df, args.output_dir)
-
+    
 
 if __name__ == "__main__":
     main()
