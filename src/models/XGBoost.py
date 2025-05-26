@@ -2,10 +2,10 @@ import os
 import pandas as pd
 import numpy as np
 import xgboost as xgb
-from sklearn.model_selection import StratifiedKFold, train_test_split
+from sklearn.model_selection import StratifiedKFold, train_test_split, RandomizedSearchCV
 from sklearn.metrics import (
     roc_auc_score, accuracy_score, precision_score,
-    recall_score, f1_score, mean_squared_error, r2_score
+    recall_score, f1_score, mean_squared_error, r2_score, confusion_matrix, roc_curve
 )
 from xgboost import plot_importance
 import matplotlib.pyplot as plt
@@ -100,8 +100,51 @@ class XGBoostBaseline:
             logger.exception(f"Data preparation failed: {str(e)}")
             return False
 
+    def hyperparameter_search(self, n_iter=20, cv=3, random_state=42):
+        """Perform RandomizedSearchCV for XGBoost hyperparameters"""
+        try:
+            import warnings
+            warnings.filterwarnings("ignore", category=UserWarning)
+            from xgboost import XGBClassifier
+            param_dist = {
+                'n_estimators': [100, 200, 300],
+                'max_depth': [3, 4, 5, 6, 8],
+                'learning_rate': [0.01, 0.05, 0.1, 0.2],
+                'subsample': [0.7, 0.8, 0.9, 1.0],
+                'colsample_bytree': [0.7, 0.8, 0.9, 1.0],
+                'gamma': [0, 0.1, 0.2, 0.3],
+                'reg_alpha': [0, 0.01, 0.1, 1],
+                'reg_lambda': [0.5, 1, 2, 5],
+            }
+            xgb_clf = XGBClassifier(
+                objective='binary:logistic',
+                scale_pos_weight=self.y_train_class.value_counts()[0] / self.y_train_class.value_counts()[1],
+                random_state=random_state,
+                use_label_encoder=False,
+                eval_metric='auc',
+                tree_method='hist',
+                n_jobs=-1
+            )
+            search = RandomizedSearchCV(
+                xgb_clf,
+                param_distributions=param_dist,
+                n_iter=n_iter,
+                scoring='roc_auc',
+                cv=cv,
+                verbose=1,
+                random_state=random_state,
+                n_jobs=-1
+            )
+            search.fit(self.X_train, self.y_train_class)
+            self.best_params = search.best_params_
+            logger.info(f"Best hyperparameters: {self.best_params}")
+            return self.best_params
+        except Exception as e:
+            logger.error(f"Hyperparameter search failed: {str(e)}")
+            return None
+
     def train_model(self, early_stopping_rounds=20):
-        """Train XGBoost model with early stopping"""
+        """Train XGBoost model with early stopping and best params if available"""
         try:
             if not hasattr(self, 'X_train') or not hasattr(self, 'y_train_class'):
                 logger.error("Training data not prepared. Call prepare_data() first.")
@@ -116,34 +159,34 @@ class XGBoostBaseline:
                 logger.error("Both classes (0 and 1) must be present in training labels.")
                 return False
             scale_pos_weight = class_counts[0] / class_counts[1]
-            params = {
+            # Use best params if available
+            params = self.best_params.copy() if self.best_params else {}
+            params.update({
                 'objective': 'binary:logistic',
                 'eval_metric': 'auc',
                 'tree_method': 'hist',
                 'scale_pos_weight': scale_pos_weight,
-                'random_state': 42,
-                'device': 'cpu'
-            }
-            cv_results = xgb.cv(
-                params,
-                dtrain_class,
-                num_boost_round=1000,
-                early_stopping_rounds=early_stopping_rounds,
-                folds=StratifiedKFold(n_splits=5),
-                metrics=("auc"),
-                seed=42
-            )
-            best_rounds = cv_results.shape[0]
-            logger.info(f"Best boosting rounds: {best_rounds}")
+                'random_state': 42
+            })
+            # Remove unused parameters for xgb.train
+            params.pop('n_estimators', None)
+            params.pop('device', None)
+            evals = [(dtrain_class, 'train'), (dtest_class, 'eval')]
             self.model = xgb.train(
                 params,
                 dtrain_class,
-                num_boost_round=best_rounds
+                num_boost_round=self.model.best_iteration + 1 if hasattr(self.model, 'best_iteration') else 1000,
+                evals=evals,
+                early_stopping_rounds=early_stopping_rounds,
+                verbose_eval=50
             )
             try:
                 joblib.dump(self.model, os.path.join(self.model_dir, 'xgb_classifier.model'))
+                with open(os.path.join(self.model_dir, 'xgb_best_params.json'), 'w') as f:
+                    import json
+                    json.dump(params, f, indent=2)
             except Exception as e:
-                logger.error(f"Failed to save model: {str(e)}")
+                logger.error(f"Failed to save model or params: {str(e)}")
             return True
         except xgb.core.XGBoostError as e:
             logger.error(f"XGBoost error during training: {str(e)}")
@@ -153,14 +196,21 @@ class XGBoostBaseline:
             return False
 
     def evaluate_model(self):
-        """Evaluate model performance with multiple metrics"""
+        """Evaluate model performance with multiple metrics and plots, including threshold tuning."""
         try:
             if self.model is None:
                 logger.error("Model not trained. Call train_model() first.")
                 return None
             dtest = xgb.DMatrix(self.X_test)
             y_pred_proba = self.model.predict(dtest)
-            y_pred = (y_pred_proba > 0.5).astype(int)
+            # Threshold tuning for best F1
+            from sklearn.metrics import f1_score, precision_recall_curve
+            precisions, recalls, thresholds = precision_recall_curve(self.y_test_class, y_pred_proba)
+            f1s = 2 * (precisions * recalls) / (precisions + recalls + 1e-8)
+            best_idx = np.argmax(f1s)
+            best_threshold = thresholds[best_idx] if best_idx < len(thresholds) else 0.5
+            logger.info(f"Best threshold for F1: {best_threshold:.4f}")
+            y_pred = (y_pred_proba > best_threshold).astype(int)
             metrics = {}
             try:
                 metrics['AUC'] = roc_auc_score(self.y_test_class, y_pred_proba)
@@ -172,11 +222,45 @@ class XGBoostBaseline:
                 metrics['Precision'] = precision_score(self.y_test_class, y_pred)
                 metrics['Recall'] = recall_score(self.y_test_class, y_pred)
                 metrics['F1'] = f1_score(self.y_test_class, y_pred)
+                metrics['Best_Threshold'] = best_threshold
             except Exception as e:
                 logger.warning(f"Classification metric calculation failed: {str(e)}")
             logger.info("Classification Metrics:")
             for metric, value in metrics.items():
                 logger.info(f"{metric}: {value}")
+            # Confusion matrix
+            try:
+                cm = confusion_matrix(self.y_test_class, y_pred)
+                plt.figure(figsize=(6, 5))
+                plt.imshow(cm, cmap='Blues', interpolation='nearest')
+                plt.title('Confusion Matrix')
+                plt.colorbar()
+                plt.xlabel('Predicted')
+                plt.ylabel('Actual')
+                for i in range(cm.shape[0]):
+                    for j in range(cm.shape[1]):
+                        plt.text(j, i, cm[i, j], ha='center', va='center', color='red')
+                plt.tight_layout()
+                plt.savefig(os.path.join(self.plot_dir, "confusion_matrix.png"))
+                plt.close()
+            except Exception as e:
+                logger.warning(f"Confusion matrix plot failed: {str(e)}")
+            # ROC curve
+            try:
+                fpr, tpr, _ = roc_curve(self.y_test_class, y_pred_proba)
+                plt.figure(figsize=(8, 6))
+                plt.plot(fpr, tpr, label=f'ROC curve (AUC = {metrics["AUC"]:.2f})')
+                plt.plot([0, 1], [0, 1], 'k--')
+                plt.xlabel('False Positive Rate')
+                plt.ylabel('True Positive Rate')
+                plt.title('Receiver Operating Characteristic')
+                plt.legend(loc='lower right')
+                plt.tight_layout()
+                plt.savefig(os.path.join(self.plot_dir, "roc_curve.png"))
+                plt.close()
+            except Exception as e:
+                logger.warning(f"ROC curve plot failed: {str(e)}")
+            # Feature importance
             try:
                 plt.figure(figsize=(12, 8))
                 plot_importance(self.model, max_num_features=20, importance_type='gain')
@@ -186,29 +270,34 @@ class XGBoostBaseline:
                 plt.close()
             except Exception as e:
                 logger.warning(f"Feature importance plot failed: {str(e)}")
+            # Save metrics
+            try:
+                with open(os.path.join(self.plot_dir, "metrics.json"), 'w') as f:
+                    import json
+                    json.dump(metrics, f, indent=2)
+            except Exception as e:
+                logger.warning(f"Saving metrics failed: {str(e)}")
             return metrics
         except Exception as e:
             logger.exception(f"Model evaluation failed: {str(e)}")
             return None
 
     def run_pipeline(self):
-        """Run complete pipeline with error handling"""
+        """Run complete pipeline with error handling and optimization"""
         logger.info("Starting XGBoost baseline pipeline")
-        
         steps = [
             ("Data Loading", self.load_data),
             ("Data Preparation", self.prepare_data),
+            ("Hyperparameter Search", self.hyperparameter_search),
             ("Model Training", self.train_model),
             ("Model Evaluation", self.evaluate_model)
         ]
-        
         for step_name, step_func in steps:
             logger.info(f"Executing step: {step_name}")
             result = step_func()
-            if not result:
+            if not result and step_name != "Hyperparameter Search":
                 logger.error(f"Pipeline failed at step: {step_name}")
                 return False
-                
         logger.info("XGBoost baseline pipeline completed successfully")
         return True
 

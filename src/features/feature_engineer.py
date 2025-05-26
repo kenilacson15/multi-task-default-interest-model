@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
 import os
 import joblib
 
@@ -45,6 +43,7 @@ original_loan_amnt = features['loan_amnt'].copy()
 # Create a copy to avoid SettingWithCopyWarning
 features_eng = features.copy()
 
+# 1. Numerical Feature Transformations
 print("\n--- 1. Numerical Feature Transformations ---")
 
 # 1a. Person Age
@@ -58,25 +57,26 @@ features_eng['person_age_young_flag'] = (features_eng['person_age'] < 25).astype
 print("Engineering 'person_income' features...")
 income_cap = original_income.quantile(0.99)
 print(f"Capping 'person_income' at 99th percentile: {income_cap:.2f}")
-features_eng['person_income_capped'] = np.clip(original_income, a_min=None, a_max=income_cap)
-features_eng['person_income_log'] = np.log1p(features_eng['person_income_capped'])  # Use log1p for robustness (handles 0)
-income_bins = pd.qcut(features_eng['person_income_capped'], q=3, labels=['low', 'medium', 'high'], duplicates='drop')
-features_eng['person_income_bracket'] = income_bins
+person_income_capped = np.clip(original_income, a_min=None, a_max=income_cap)
+features_eng['person_income_capped'] = person_income_capped
+features_eng['person_income_log'] = np.log1p(person_income_capped)
+features_eng['person_income_bracket'] = pd.qcut(person_income_capped, q=3, labels=['low', 'medium', 'high'], duplicates='drop')
 
 # 1c. Employment Length (person_emp_length)
 print("Engineering 'person_emp_length' features...")
-emp_bins = [-np.inf, 1, 5, 10, np.inf]  # Use -inf to include 0
+emp_bins = [-np.inf, 1, 5, 10, np.inf]
 emp_labels = ['0-1', '1-5', '5-10', '>10']
-features_eng['person_emp_length'].fillna(-1, inplace=True)  # Temporarily fill NaN
+features_eng['person_emp_length'] = features_eng['person_emp_length'].fillna(-1)
 features_eng['person_emp_length_group'] = pd.cut(features_eng['person_emp_length'], bins=emp_bins, labels=emp_labels, right=True)
 
 # 1d. Loan Amount (loan_amnt) - Cap outliers before log transform
 print("Engineering 'loan_amnt' features...")
 loan_amnt_cap = original_loan_amnt.quantile(0.99)
 print(f"Capping 'loan_amnt' at 99th percentile: {loan_amnt_cap:.2f}")
-features_eng['loan_amnt_capped'] = np.clip(original_loan_amnt, a_min=None, a_max=loan_amnt_cap)
-features_eng['loan_amnt_log'] = np.log1p(features_eng['loan_amnt_capped'])
-features_eng['loan_amnt_quartile'] = pd.qcut(features_eng['loan_amnt_capped'], q=4, labels=['Q1', 'Q2', 'Q3', 'Q4'], duplicates='drop')
+loan_amnt_capped = np.clip(original_loan_amnt, a_min=None, a_max=loan_amnt_cap)
+features_eng['loan_amnt_capped'] = loan_amnt_capped
+features_eng['loan_amnt_log'] = np.log1p(loan_amnt_capped)
+features_eng['loan_amnt_quartile'] = pd.qcut(loan_amnt_capped, q=4, labels=['Q1', 'Q2', 'Q3', 'Q4'], duplicates='drop')
 
 # 1e. Loan Percent Income (loan_percent_income)
 print("Engineering 'loan_percent_income' features...")
@@ -90,42 +90,40 @@ cred_hist_bins = [-np.inf, 2, 5, 10, np.inf]
 cred_hist_labels = ['<2', '2-5', '5-10', '>10']
 features_eng['cb_person_cred_hist_length_group'] = pd.cut(features_eng['cb_person_cred_hist_length'], bins=cred_hist_bins, labels=cred_hist_labels, right=False)
 
+# 2. Categorical Feature Encoding
 print("\n--- 2. Categorical Feature Encoding ---")
 
-# 2a. Person Home Ownership (One-Hot) - Handled later by ColumnTransformer for robustness
-print("Preparing 'person_home_ownership' for one-hot encoding.")
-home_ownership_cats = ['RENT', 'MORTGAGE', 'OWN', 'OTHER']  # Define expected categories
+# 2a. Person Home Ownership (One-Hot)
+home_ownership_cats = ['RENT', 'MORTGAGE', 'OWN', 'OTHER']
 features_eng['person_home_ownership'] = pd.Categorical(features_eng['person_home_ownership'], categories=home_ownership_cats, ordered=False)
 
-# 2b. Loan Intent (One-Hot) - Handled later by ColumnTransformer
-print("Preparing 'loan_intent' for one-hot encoding.")
+# 2b. Loan Intent (One-Hot) - No transformation needed here
 
 # 2c. Loan Grade (Ordinal)
-print("Applying ordinal encoding to 'loan_grade'.")
 grade_order = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 ordinal_encoder_grade = OrdinalEncoder(categories=[grade_order])
 features_eng['loan_grade_encoded'] = ordinal_encoder_grade.fit_transform(features_eng[['loan_grade']])
 
 # 2d. Default History (Binary Mapping)
-print("Applying binary mapping to 'cb_person_default_on_file'.")
 features_eng['cb_person_default_on_file_encoded'] = features_eng['cb_person_default_on_file'].map({'Y': 1, 'N': 0})
-features_eng['cb_person_default_on_file_encoded'].fillna(-1, inplace=True)
+features_eng['cb_person_default_on_file_encoded'] = features_eng['cb_person_default_on_file_encoded'].fillna(-1)
 
+# 3. Interaction & Domain-Specific Features
 print("\n--- 3. Interaction & Domain-Specific Features ---")
 
 # 3a. Stability Score
-print("Creating 'stability_score'.")
 features_eng['stability_score'] = original_emp_length.fillna(0) * original_cred_hist.fillna(0)
 
 # 3c. Risk Group
-print("Creating 'risk_group'.")
-features_eng['risk_group'] = ('Grade' + features_eng['loan_grade'] + '_' +
-                             features_eng['cb_person_default_on_file'].map({'Y': 'Default', 'N': 'NoDefault', np.nan: 'UnknownDefault'}))
+features_eng['risk_group'] = (
+    'Grade' + features_eng['loan_grade'].astype(str) + '_' +
+    features_eng['cb_person_default_on_file'].map({'Y': 'Default', 'N': 'NoDefault'}).fillna('UnknownDefault')
+)
 
 # 3d. Age-Income Interaction
-print("Creating 'age_income_interaction'.")
 features_eng['age_income_interaction'] = features_eng['person_age_group'].astype(str) + '_' + features_eng['person_income_bracket'].astype(str)
 
+# 4. Final Processing (Encoding Remaining Categoricals & Scaling)
 print("\n--- 4. Final Processing (Encoding Remaining Categoricals & Scaling) ---")
 
 categorical_features_ohe = [
@@ -134,12 +132,10 @@ categorical_features_ohe = [
     'cb_person_cred_hist_length_group', 'risk_group', 'age_income_interaction'
 ]
 
+# Only keep valid categorical columns
+categorical_features_ohe = [col for col in categorical_features_ohe if col in features_eng.columns]
 for col in categorical_features_ohe:
-    if col in features_eng.columns:
-        features_eng[col] = features_eng[col].astype(str).fillna('Missing')
-    else:
-        print(f"Warning: Column {col} not found for OHE, skipping.")
-        categorical_features_ohe.remove(col)
+    features_eng[col] = features_eng[col].astype(str).fillna('Missing')
 
 numerical_features_to_scale = [
     'person_age', 'person_income_log', 'loan_amnt_log',
@@ -151,7 +147,7 @@ binary_ordinal_features = [
     'person_age_young_flag', 'loan_grade_encoded', 'cb_person_default_on_file_encoded'
 ]
 
-# Define the ColumnTransformer
+# ColumnTransformer for scaling and encoding
 preprocessor = ColumnTransformer(
     transformers=[
         ('num', StandardScaler(), numerical_features_to_scale),
@@ -173,16 +169,14 @@ final_feature_names = num_feature_names + list(ohe_feature_names) + remainder_fe
 features_final = pd.DataFrame(features_processed, columns=final_feature_names, index=features_eng.index)
 print(f"Final feature set shape before removing constants: {features_final.shape}")
 
-# --- NEW SECTION: Remove Near-Constant Features ---
+# Remove Near-Constant Features
 print("\n--- NEW STEP: Removing Near-Constant Features ---")
 threshold = 0.99
-const_features = []
-
-for col in features_final.columns:
-    value_counts = features_final[col].value_counts(normalize=True)
-    if not value_counts.empty and value_counts.iloc[0] > threshold:
-        const_features.append((col, value_counts.index[0], value_counts.iloc[0]))
-
+const_features = [
+    (col, value_counts.index[0], value_counts.iloc[0])
+    for col in features_final.columns
+    if (value_counts := features_final[col].value_counts(normalize=True)).iloc[0] > threshold
+]
 if const_features:
     print(f" Removing {len(const_features)} near-constant features:")
     for col, val, pct in const_features:
