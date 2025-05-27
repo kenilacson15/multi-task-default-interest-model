@@ -196,7 +196,7 @@ class XGBoostBaseline:
             return False
 
     def evaluate_model(self):
-        """Evaluate model performance with multiple metrics and plots, including threshold tuning."""
+        """Evaluate model performance with multiple metrics and plots, including threshold tuning and SHAP feature importance."""
         try:
             if self.model is None:
                 logger.error("Model not trained. Call train_model() first.")
@@ -270,13 +270,71 @@ class XGBoostBaseline:
                 plt.close()
             except Exception as e:
                 logger.warning(f"Feature importance plot failed: {str(e)}")
-            # Save metrics
+            # SHAP feature importance
+            shap_results = {}
             try:
+                import shap
+                explainer = shap.TreeExplainer(self.model)
+                shap_values = explainer.shap_values(self.X_test)
+                # Mean absolute SHAP value for each feature
+                shap_importance = np.abs(shap_values).mean(axis=0)
+                feature_names = list(self.X_test.columns)
+                shap_importance_dict = dict(sorted(zip(feature_names, shap_importance), key=lambda x: -x[1]))
+                shap_results['shap_importance'] = shap_importance_dict
+                # Save SHAP summary plot
+                plt.figure()
+                shap.summary_plot(shap_values, self.X_test, feature_names=feature_names, show=False)
+                plt.tight_layout()
+                plt.savefig(os.path.join(self.plot_dir, "shap_summary_plot.png"))
+                plt.close()
+                # Save SHAP waterfall plot for a random sample
+                plt.figure()
+                shap.plots._waterfall.waterfall_legacy(explainer.expected_value, shap_values[0], feature_names=feature_names)
+                plt.tight_layout()
+                plt.savefig(os.path.join(self.plot_dir, "shap_waterfall_example.png"))
+                plt.close()
+            except Exception as e:
+                logger.warning(f"SHAP analysis failed: {str(e)}")
+                shap_results['shap_importance'] = {}
+            # Save metrics and SHAP to txt log
+            try:
+                log_path = os.path.join(self.plot_dir, "performance_and_shap_log.txt")
+                with open(log_path, 'a') as f:
+                    from datetime import datetime
+                    f.write(f"\n=== XGBoost Model Performance Log: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n")
+                    for metric, value in metrics.items():
+                        f.write(f"{metric}: {value}\n")
+                    f.write("\nTop 20 SHAP Feature Importances:\n")
+                    for i, (feat, val) in enumerate(list(shap_results['shap_importance'].items())[:20]):
+                        f.write(f"{i+1}. {feat}: {val:.6f}\n")
+                    f.write("\n")
+            except Exception as e:
+                logger.warning(f"Saving performance and SHAP log failed: {str(e)}")
+            # Save metrics as JSON as well
+            try:
+                # Ensure all metrics and SHAP values are native Python floats for JSON serialization
+                def to_native(val):
+                    if isinstance(val, np.generic):
+                        return val.item()
+                    if isinstance(val, dict):
+                        return {k: to_native(v) for k, v in val.items()}
+                    return val
+                metrics_native = {k: to_native(v) for k, v in metrics.items()}
+                shap_results_native = {k: to_native(v) for k, v in shap_results.items()}
                 with open(os.path.join(self.plot_dir, "metrics.json"), 'w') as f:
                     import json
-                    json.dump(metrics, f, indent=2)
+                    json.dump({**metrics_native, **shap_results_native}, f, indent=2)
             except Exception as e:
                 logger.warning(f"Saving metrics failed: {str(e)}")
+            # Warn if recall is much lower than precision
+            try:
+                if metrics.get('Recall') is not None and metrics.get('Precision') is not None:
+                    recall = float(metrics['Recall'])
+                    precision = float(metrics['Precision'])
+                    if recall < 0.8 * precision:
+                        logger.warning(f"Recall ({recall:.3f}) is much lower than Precision ({precision:.3f}). Consider lowering the classification threshold to increase recall if your domain prioritizes catching more positives.")
+            except Exception as e:
+                logger.warning(f"Recall/Precision warning check failed: {str(e)}")
             return metrics
         except Exception as e:
             logger.exception(f"Model evaluation failed: {str(e)}")
@@ -302,8 +360,8 @@ class XGBoostBaseline:
         return True
 
 if __name__ == "__main__":
-    # Define paths
-    features_path = r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\feature-engineer\processed_features.csv"
+    # Define paths for XGBoost-optimized features
+    features_path = r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\feature-engineer\processed_features_xgb_top30.csv"
     targets_path = r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\feature-engineer\targets.csv"
     
     # Initialize and run pipeline
