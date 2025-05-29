@@ -7,8 +7,8 @@ import joblib
 
 # --- Configuration ---
 # Use raw strings or forward slashes for Windows paths
-TRAIN_DATA_PATH = r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\train-validate-split\train.csv"
-OUTPUT_DIR = r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\data\feature-engineer"
+TRAIN_DATA_PATH = r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\tests\data\val.csv"
+OUTPUT_DIR = r"C:\Users\Ken Ira Talingting\Desktop\multi-task-default-interest-model\tests\data\feature-engineer-data"
 TARGET_COLUMNS = ['loan_status', 'loan_int_rate']  # Define primary targets for separation
 
 # Ensure output directory exists

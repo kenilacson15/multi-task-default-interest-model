@@ -1,6 +1,6 @@
 {
-  "default_accuracy": 0.9147853032315184,
-  "default_auc": 0.9103892603594408,
-  "interest_mae": 0.9647218269434267,
-  "interest_mse": 1.7464294915487033
+  "default_accuracy": 0.8864690461786651,
+  "default_auc": 0.903777517135387,
+  "interest_mae": 1.6815356728280113,
+  "interest_mse": 4.043658346961053
 }
