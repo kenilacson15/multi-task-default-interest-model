@@ -37,6 +37,23 @@ The deep learning model leverages shared representations for both tasks, improvi
 
 ---
 
+## 🧩 XGBoost Model Validation
+
+The XGBoost model was validated on the latest processed features and targets. Results below reflect the model's performance as of 2025-05-30:
+
+```
+default_accuracy: 0.9120790481952007
+default_auc: 0.9462733953641076
+interest_mae: 10.704221232795822
+interest_mse: 123.26981927578338
+```
+
+- Model loaded as XGBoost Booster (future-proofed, no serialization issues).
+- For best compatibility, always save models with `Booster.save_model()` and load with `Booster.load_model()`.
+- See `models/xgb_validation/` for ROC curve and metrics output.
+
+---
+
 ## 🗂️ Project Structure
 ```
 ├── data/                # Raw, cleaned, and feature-engineered datasets
