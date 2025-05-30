@@ -1,7 +1,7 @@
 # Multi-Task Default & Interest Rate Prediction Model 🚀
 
 ## Overview
-Welcome to a state-of-the-art machine learning pipeline for financial risk assessment! This project predicts both loan default (classification) and loan interest rate (regression) using advanced feature engineering and XGBoost modeling. Designed for real-world credit scoring, it emphasizes model interpretability, reproducibility, and actionable insights.
+Welcome to a comprehensive machine learning pipeline for financial risk assessment! This project predicts both loan default (classification) and loan interest rate (regression) using advanced feature engineering and XGBoost modeling. Designed for real-world credit scoring, it emphasizes model interpretability, reproducibility, and actionable insights.
 
 ---
 
@@ -24,6 +24,14 @@ This project also features a robust deep learning multi-task model built with Te
 - **Loan Interest Rate (Regression):**
   - Interest MAE: **0.9647**
   - Interest MSE: **1.7464**
+
+### Latest Validation Results (2025-05-29)
+```
+default_accuracy: 0.8864690461786651
+default_auc: 0.903777517135387
+interest_mae: 1.6815356728280113
+interest_mse: 4.043658346961053
+```
 
 The deep learning model leverages shared representations for both tasks, improving generalization and efficiency. Training curves, ROC curves, and scatter plots for regression predictions are automatically generated and saved in `models/dl_multitask_baseline/`.
 
