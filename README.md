@@ -1,60 +1,129 @@
 # Multi-Task Default & Interest Rate Prediction Model 🚀
 
-## Overview
-Welcome to a comprehensive machine learning pipeline for financial risk assessment! This project predicts both loan default (classification) and loan interest rate (regression) using advanced feature engineering and XGBoost modeling. Designed for real-world credit scoring, it emphasizes model interpretability, reproducibility, and actionable insights.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-DeepLearning-orange.svg)](https://www.tensorflow.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-Baseline-lightgrey.svg)](https://xgboost.readthedocs.io/)
+
+---
+
+## 🌟 Introduction
+
+**Multi-Task Default & Interest Rate Prediction Model** is a modern, production-ready machine learning pipeline for financial risk assessment. The project’s core is a deep learning multi-task model that simultaneously predicts loan default (classification) and loan interest rate (regression) from engineered features. XGBoost baselines are included for benchmarking and interpretability.
+
+This repository is designed for real-world credit scoring, with a focus on transparency, reproducibility, and extensibility. Whether you’re a data scientist, ML engineer, or financial analyst, this project provides a robust foundation for advanced credit risk modeling.
 
 ---
 
 ## ✨ Features
-- **Automated Data Cleaning & Validation**: Ensure data quality from the start.
-- **Smart Feature Engineering**: Select the most predictive features using XGBoost and model-based techniques.
-- **Multi-Task Learning**: Predict default risk and interest rates in a single, unified workflow.
-- **Hyperparameter Optimization**: Find the best XGBoost settings with randomized search.
-- **Comprehensive Evaluation**: Get AUC, F1, Precision, Recall, confusion matrix, ROC curve, and more.
-- **Model Interpretability**: SHAP analysis and feature importance plots for full transparency.
-- **Reproducible Results**: All models, metrics, and plots are saved for easy review and sharing.
+
+- **Unified Multi-Task Deep Learning:** Jointly predicts default risk and interest rates in a single, efficient architecture.
+- **XGBoost Baselines:** Strong tree-based models for benchmarking and interpretability.
+- **End-to-End Data Pipeline:** Automated data cleaning, validation, and advanced feature engineering.
+- **Comprehensive Evaluation:** AUC, F1, Precision, Recall, confusion matrix, ROC curve, MAE, MSE, and more.
+- **Model Interpretability:** SHAP analysis, feature importance plots, and clear reporting.
+- **Reproducibility:** All models, metrics, and plots are versioned and saved for review.
+- **Modern Engineering Practices:** Modular code, early stopping, checkpointing, and robust logging.
 
 ---
 
-## 🧠 Deep Learning Multi-Task Baseline
-This project also features a robust deep learning multi-task model built with TensorFlow/Keras. The model jointly predicts:
-- **Loan Default (Classification):**
-  - Default Accuracy: **0.9148**
-  - Default AUC: **0.9104**
-- **Loan Interest Rate (Regression):**
-  - Interest MAE: **0.9647**
-  - Interest MSE: **1.7464**
+## 💡 Use Cases
 
-### Latest Validation Results (2025-05-29)
-```
-default_accuracy: 0.8864690461786651
-default_auc: 0.903777517135387
-interest_mae: 1.6815356728280113
-interest_mse: 4.043658346961053
-```
-
-The deep learning model leverages shared representations for both tasks, improving generalization and efficiency. Training curves, ROC curves, and scatter plots for regression predictions are automatically generated and saved in `models/dl_multitask_baseline/`.
+- **Credit Scoring:** Predict the likelihood of loan default and estimate fair interest rates for applicants.
+- **Risk Management:** Identify high-risk borrowers and optimize lending strategies.
+- **Benchmarking:** Compare deep learning and XGBoost approaches for multi-task financial modeling.
+- **Feature Engineering Research:** Explore the impact of advanced feature engineering on model performance.
 
 ---
 
-## 🧩 XGBoost Model Validation
+## 🚀 Model Performance Highlights
 
-The XGBoost model was validated on the latest processed features and targets. Results below reflect the model's performance as of 2025-05-30:
+### Deep Learning Multi-Task Model (Latest Validation)
 
-```
-default_accuracy: 0.9120790481952007
-default_auc: 0.9462733953641076
-interest_mae: 10.704221232795822
-interest_mse: 123.26981927578338
-```
+| Metric           | Value    |
+|------------------|----------|
+| Default Accuracy | **0.886**|
+| Default AUC      | **0.904**|
+| Interest MAE     | **1.68** |
+| Interest MSE     | **4.04** |
 
-- Model loaded as XGBoost Booster (future-proofed, no serialization issues).
-- For best compatibility, always save models with `Booster.save_model()` and load with `Booster.load_model()`.
-- See `models/xgb_validation/` for ROC curve and metrics output.
+*Latest validation: 2025-05-29. Demonstrates strong performance on both classification and regression tasks.*
+
+### XGBoost Baseline (Latest Validation)
+
+| Metric           | Value    |
+|------------------|----------|
+| Default Accuracy | 0.912    |
+| Default AUC      | 0.946    |
+| Interest MAE     | 10.70    |
+| Interest MSE     | 123.27   |
+
+*Latest validation: 2025-05-30. See `models/xgb_validation/` for full details and plots.*
+
+---
+
+## 🧠 Deep Learning Model Architecture
+
+- **Shared Representation:** Dense layers with batch normalization and dropout extract common patterns from input features.
+- **Task-Specific Heads:**  
+  - **Default Head:** Outputs default probability (sigmoid activation).  
+  - **Interest Rate Head:** Predicts interest rate (linear activation).
+- **Multi-Task Loss:** Combines binary cross-entropy (default) and MSE (interest rate) for joint optimization.
+- **Regularization:** Dropout and batch normalization prevent overfitting and stabilize training.
+- **Training Best Practices:** Early stopping, checkpointing, and automatic generation of training/validation plots.
+
+This architecture leverages shared information between tasks, often outperforming separate models. The code is modular and easy to extend for additional tasks or features.
+
+---
+
+## 📦 Installation
+
+1. **Clone the repository:**
+   ```sh
+   git clone <repo-url>
+   cd multi-task-default-interest-model
+   ```
+2. **Install dependencies:**
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+---
+
+## ⚡ Usage
+
+1. **Prepare your data:**
+   - Place your raw and processed data in the `data/` directory as shown in the project structure.
+
+2. **Run the deep learning multi-task model:**
+   ```sh
+   python src/models/DL_Multitask_Baseline.py
+   ```
+
+3. **Run the XGBoost baseline:**
+   ```sh
+   python src/models/XGBoost.py
+   ```
+
+4. **Outputs:**
+   - All models, metrics, and plots will be saved in the `models/` and `model-results/` directories.
+
+---
+
+## 📝 Example
+
+After running the deep learning pipeline, you’ll find:
+
+- `models/dl_multitask_baseline/best_model.h5` — Trained Keras model
+- `models/dl_multitask_baseline/dl_validation_metrics.json` — Validation metrics
+- `models/dl_multitask_baseline/roc_curve_default.png` — ROC curve for default prediction
+- `models/dl_multitask_baseline/int_rate_scatter.png` — Scatter plot for interest rate prediction
+- `models/dl_multitask_baseline/training_curves.png` — Training/validation curves
 
 ---
 
 ## 🗂️ Project Structure
+
 ```
 ├── data/                # Raw, cleaned, and feature-engineered datasets
 ├── docs/                # Documentation and changelogs
@@ -71,49 +140,27 @@ interest_mse: 123.26981927578338
 
 ---
 
-## 🚦 Getting Started
-1. **Clone the repository:**
-   ```sh
-   git clone <repo-url>
-   cd multi-task-default-interest-model
-   ```
-2. **Install dependencies:**
-   ```sh
-   pip install -r requirements.txt
-   ```
-3. **Prepare your data:**
-   - Place your raw and processed data in the `data/` directory as shown above.
-4. **Run the pipeline:**
-   - Execute the main script for XGBoost baseline:
-     ```sh
-     python src/models/XGBoost.py
-     ```
-   - Outputs (plots, metrics, models) will be saved in the `models/` and `model-results/` directories.
-
----
-
-## 🛠️ Key Scripts
-- `src/models/XGBoost.py`: Main pipeline for XGBoost-based multi-task modeling.
-- `src/features/feature_engineer_xgb_top30.py`: Feature selection and engineering for XGBoost.
-- `src/data/`: Data cleaning and validation utilities.
-
----
-
 ## 🔍 Model Interpretability
+
 - SHAP summary and waterfall plots for transparency.
 - Feature importance is visualized and logged for both tasks.
 
 ---
 
 ## 🤝 Contributing
-We welcome contributions from the community! If you have ideas, spot bugs, or want to add features, please open an issue or submit a pull request.
+
+Contributions are welcome! If you have ideas, spot bugs, or want to add features, please open an issue or submit a pull request. See the `docs/` folder for more information.
 
 ---
 
 ## 📄 License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 📬 Contact
-Questions or want to collaborate? Reach out via GitHub Issues or email the maintainer. Let's build better credit risk models together!
+
+Questions or want to collaborate?  
+Open an issue or email the maintainer.  
+Let’s build better credit risk models together!
